@@ -1,0 +1,69 @@
+---
+import InfoRow from "./InfoRow.astro";
+import SectionDivider from "./SectionDivider.astro";
+import AsciiAnim from "./AsciiAnim.astro";
+import { profile } from "../data/profile";
+import { portraitAscii } from "../data/portrait";
+
+let rowIndex = 0;
+const nextDelay = () => 80 + rowIndex++ * 35;
+---
+
+<div class="neofetch">
+  <div class="neofetch-left">
+    <pre class="portrait" aria-hidden="true">{portraitAscii}</pre>
+    <AsciiAnim />
+  </div>
+
+  <div class="info-panel">
+    {
+      profile.systemInfo.map((field) => (
+        <InfoRow
+          label={field.label}
+          value={field.value}
+          delay={nextDelay()}
+        />
+      ))
+    }
+
+    <SectionDivider title="Stack" />
+
+    {
+      profile.languages.map((field) => (
+        <InfoRow
+          label={field.label}
+          value={field.value}
+          delay={nextDelay()}
+        />
+      ))
+    }
+
+    <SectionDivider title="Contact" />
+
+    {
+      profile.contact.map((field) => (
+        <InfoRow
+          label={field.label}
+          value={field.value}
+          href={field.href}
+          delay={nextDelay()}
+        />
+      ))
+    }
+
+    <SectionDivider title="GitHub Stats" />
+
+    {
+      profile.githubStats.map((stat) => (
+        <InfoRow
+          label={stat.label}
+          value={stat.value}
+          html={stat.html}
+          additions={stat.additions}
+          deletions={stat.deletions}
+          delay={nextDelay()}
+        />
+      ))
+    }
+  </div>
+</div>

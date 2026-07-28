@@ -1,0 +1,43 @@
+---
+import SectionDivider from "./SectionDivider.astro";
+import { profile } from "../data/profile";
+---
+
+<section class="terminal-section" aria-labelledby="projects-heading">
+  <SectionDivider title="Projects" />
+  <h2 id="projects-heading" class="sr-only">Projects</h2>
+
+  {
+    profile.projects.map((project) => (
+      <article class="project-block">
+        <div class="project-block__header">
+          <span class="project-block__title">{project.name}</span>
+          <span class="project-block__url">
+            <a href={project.url} target="_blank" rel="noopener noreferrer">
+              {project.url.replace(/^https?:\/\//, "")}
+            </a>
+          </span>
+        </div>
+        <ul class="project-block__bullets">
+          {project.bullets.map((bullet) => (
+            <li>{bullet}</li>
+          ))}
+        </ul>
+      </article>
+    ))
+  }
+</section>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

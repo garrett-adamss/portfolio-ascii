@@ -1,0 +1,19 @@
+---
+import TerminalLayout from "../layouts/TerminalLayout.astro";
+import NeofetchHero from "../components/NeofetchHero.astro";
+import Experience from "../components/Experience.astro";
+import Projects from "../components/Projects.astro";
+import { profile } from "../data/profile";
+---
+
+<TerminalLayout title={profile.title}>
+  <header class="terminal-header">
+    <span class="terminal-header__user">{profile.username}</span>
+    <span class="terminal-header__line" aria-hidden="true"></span>
+    <span class="terminal-header__caret" aria-hidden="true"></span>
+  </header>
+
+  <NeofetchHero />
+  <Experience />
+  <Projects />
+</TerminalLayout>

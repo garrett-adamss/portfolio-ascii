@@ -1,0 +1,40 @@
+---
+import SectionDivider from "./SectionDivider.astro";
+import { profile } from "../data/profile";
+---
+
+<section class="terminal-section" aria-labelledby="experience-heading">
+  <SectionDivider title="Experience" />
+  <h2 id="experience-heading" class="sr-only">Experience</h2>
+
+  {
+    profile.experience.map((job) => (
+      <article class="job-block">
+        <div class="job-block__header">
+          <span class="job-block__title">{job.title}</span>
+          <span class="job-block__company">{job.company}</span>
+          <span class="job-block__dates">{job.dates}</span>
+        </div>
+        <ul class="job-block__bullets">
+          {job.bullets.map((bullet) => (
+            <li>{bullet}</li>
+          ))}
+        </ul>
+      </article>
+    ))
+  }
+</section>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

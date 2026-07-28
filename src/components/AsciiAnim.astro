@@ -1,0 +1,204 @@
+---
+---
+
+<div class="ascii-anim-wrap" aria-hidden="true">
+  <pre class="ascii-anim" data-ascii-anim></pre>
+</div>
+
+<script>
+  import { earthFrames } from "../data/earthFrames";
+
+  const FPS = 6; // slower spin
+  const PAD_X = 8;
+  const PAD_Y = 4;
+  const STAR_CHARS = "·.*+";
+  const STAR_DENSITY = 0.045;
+
+  function init() {
+    const el = document.querySelector("[data-ascii-anim]");
+    if (!(el instanceof HTMLElement) || earthFrames.length === 0) return;
+
+    // Normalize every frame to the same WxH so the globe never shifts
+    const maxH = Math.max(...earthFrames.map((f) => f.split("\n").length));
+    const maxW = Math.max(
+      ...earthFrames.map((f) =>
+        Math.max(...f.split("\n").map((l) => l.length)),
+      ),
+    );
+
+    const base = earthFrames.map((frame) => {
+      const lines = frame.split("\n");
+      const padded = Array.from({ length: maxH }, (_, y) => {
+        const line = lines[y] ?? "";
+        return line.padEnd(maxW, " ").slice(0, maxW);
+      });
+      return padded;
+    });
+
+    const earthH = maxH;
+    const earthW = maxW;
+    const totalH = earthH + PAD_Y * 2;
+    const totalW = earthW + PAD_X * 2;
+
+    // Fixed star positions in the padding / empty space around Earth
+    /** @type {{ x: number; y: number; ch: string; phase: number }[]} */
+    const stars = [];
+    for (let y = 0; y < totalH; y++) {
+      for (let x = 0; x < totalW; x++) {
+        const inEarth =
+          y >= PAD_Y &&
+          y < PAD_Y + earthH &&
+          x >= PAD_X &&
+          x < PAD_X + earthW;
+        if (inEarth) {
+          const ey = y - PAD_Y;
+          const ex = x - PAD_X;
+          if (base[0][ey][ex] !== " ") continue; // never cover Earth body
+        }
+        // Prefer ring around the globe; lighter density in far corners
+        const cx = PAD_X + earthW / 2;
+        const cy = PAD_Y + earthH / 2;
+        const dx = (x - cx) / (earthW / 2 + PAD_X);
+        const dy = (y - cy) / (earthH / 2 + PAD_Y);
+        const dist = Math.hypot(dx, dy);
+        if (dist < 1.05) continue; // keep clear just outside surface
+        const chance = dist < 1.55 ? STAR_DENSITY * 1.6 : STAR_DENSITY;
+        if (Math.random() < chance) {
+          stars.push({
+            x,
+            y,
+            ch: STAR_CHARS[(Math.random() * STAR_CHARS.length) | 0],
+            phase: Math.random() * Math.PI * 2,
+          });
+        }
+      }
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.textContent = compose(0, 0);
+      return;
+    }
+
+    let i = 0;
+    let raf = 0;
+    let last = performance.now();
+    let acc = 0;
+    let t = 0;
+
+    function compose(frameIndex, time) {
+      /** @type {string[][]} */
+      const grid = Array.from({ length: totalH }, () =>
+        Array.from({ length: totalW }, () => " "),
+      );
+
+      // Stars first (behind)
+      for (const star of stars) {
+        const twinkle = 0.55 + 0.45 * Math.sin(time * 1.8 + star.phase);
+        if (twinkle < 0.35) continue; // blink off sometimes
+        grid[star.y][star.x] =
+          twinkle > 0.85
+            ? "*"
+            : star.ch;
+      }
+
+      // Earth on top
+      const earth = base[frameIndex];
+      for (let y = 0; y < earthH; y++) {
+        for (let x = 0; x < earthW; x++) {
+          const ch = earth[y][x];
+          if (ch !== " ") {
+            grid[y + PAD_Y][x + PAD_X] = ch;
+          }
+        }
+      }
+
+      return grid.map((row) => row.join("")).join("\n");
+    }
+
+    const paint = () => {
+      el.textContent = compose(i, t);
+    };
+
+    const tick = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      t += dt;
+      acc += dt;
+      if (acc >= 1 / FPS) {
+        acc = 0;
+        i = (i + 1) % earthFrames.length;
+      }
+      // Twinkle at a higher rate than frame advance
+      paint();
+      raf = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      cancelAnimationFrame(raf);
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    };
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) cancelAnimationFrame(raf);
+      else start();
+    });
+
+    paint();
+    start();
+  }
+
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>
+
+<style>
+  .ascii-anim-wrap {
+    margin-top: 0.85rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .ascii-anim {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    line-height: 1.05;
+    letter-spacing: 0;
+    color: var(--value-muted);
+    white-space: pre;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  @media (max-width: 768px) {
+    .ascii-anim-wrap {
+      margin-top: 0;
+      flex: 1 1 0;
+      min-width: 0;
+      max-height: 8.5rem;
+      overflow: hidden;
+      align-items: center;
+    }
+
+    .ascii-anim {
+      font-size: 0.28rem;
+      line-height: 1.05;
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ascii-anim-wrap {
+      max-height: 7rem;
+    }
+
+    .ascii-anim {
+      font-size: 0.22rem;
+    }
+  }
+</style>

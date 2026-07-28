@@ -1,0 +1,12 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="section-divider">
+  <span>- {title}</span>
+  <span class="section-divider__line" aria-hidden="true"></span>
+</div>

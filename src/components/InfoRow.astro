@@ -1,0 +1,47 @@
+---
+interface Props {
+  label: string;
+  value: string;
+  href?: string;
+  muted?: boolean;
+  html?: boolean;
+  additions?: string;
+  deletions?: string;
+  delay?: number;
+}
+
+const {
+  label,
+  value,
+  href,
+  muted = false,
+  html = false,
+  additions,
+  deletions,
+  delay = 0,
+} = Astro.props;
+
+const dotCount = 48;
+const dots = ".".repeat(dotCount);
+---
+
+<div class="info-row" style={`animation-delay: ${delay}ms`}>
+  <span class="info-row__label">{label}</span>
+  <span class="info-row__dots" aria-hidden="true">{dots}</span>
+  <span class:list={["info-row__value", muted && "info-row__value--muted"]}>
+    {
+      html && additions && deletions ? (
+        <>
+          <span class="add">{additions}</span>{" "}
+          <span class="del">{deletions}</span>
+        </>
+      ) : href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {value}
+        </a>
+      ) : (
+        value
+      )
+    }
+  </span>
+</div>
