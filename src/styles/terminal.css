@@ -304,6 +304,67 @@ body {
   color: var(--label);
 }
 
+.terminal-footer {
+  margin-top: 3.5rem;
+  padding-top: 0.25rem;
+  animation: fade-in 0.6s ease-out 0.45s both;
+}
+
+.terminal-footer__prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin: 0.85rem 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.terminal-footer__user {
+  color: var(--header);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.terminal-footer__user::after {
+  content: "$ ";
+  color: var(--dot);
+  font-weight: 400;
+}
+
+.terminal-footer__cmd {
+  color: var(--value-muted);
+}
+
+.terminal-footer__message {
+  margin: 0 0 1.1rem;
+  padding-left: 0.15rem;
+  color: var(--dot);
+  font-size: 0.92em;
+}
+
+.terminal-footer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.55rem;
+  margin-top: 1.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--divider);
+  color: var(--value-muted);
+  font-size: 0.88em;
+  opacity: 0.85;
+}
+
+.terminal-footer__sep {
+  color: var(--dot);
+  opacity: 0.6;
+}
+
+.terminal-footer__built {
+  color: var(--label);
+  opacity: 0.75;
+}
+
 @media (max-width: 768px) {
   html {
     font-size: 14px;
@@ -369,6 +430,10 @@ body {
     margin-top: 2.35rem;
   }
 
+  .terminal-footer {
+    margin-top: 2.75rem;
+  }
+
   .job-block__dates {
     margin-left: 0;
     flex-basis: 100%;
@@ -397,6 +462,7 @@ body {
   .neofetch,
   .info-row,
   .terminal-section,
+  .terminal-footer,
   .terminal-header__caret {
     animation: none;
   }

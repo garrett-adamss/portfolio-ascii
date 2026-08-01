@@ -1,0 +1,133 @@
+---
+import TerminalLayout from "../layouts/TerminalLayout.astro";
+import SignalLost from "../components/SignalLost.astro";
+import { profile } from "../data/profile";
+---
+
+<TerminalLayout
+  title="404 — Page not found"
+  description="Signal lost. The requested page could not be found."
+>
+  <div class="not-found">
+    <h1 class="visually-hidden">404 — Page not found</h1>
+    <SignalLost />
+
+    <p class="not-found__msg">signal lost — page not found</p>
+
+    <p class="not-found__prompt">
+      <span class="not-found__user">{profile.username}</span>
+      <a class="not-found__link" href="/">cd ~</a>
+      <span class="not-found__caret" aria-hidden="true"></span>
+    </p>
+  </div>
+</TerminalLayout>
+
+<script>
+  // Hosts serve this page for unknown paths while keeping the broken URL.
+  // Normalize the address bar to /404.
+  if (location.pathname !== "/404") {
+    history.replaceState(null, "", "/404");
+  }
+</script>
+
+<style>
+  :global(body:has(.not-found)) {
+    background: #000;
+  }
+
+  :global(.terminal:has(.not-found)) {
+    max-width: none;
+    min-height: 100vh;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 2rem 1.25rem;
+    animation: not-found-in 0.7s ease-out both;
+  }
+
+  .not-found__msg {
+    margin: 1.35rem 0 0;
+    font-size: 0.78rem;
+    color: #6e7681;
+    letter-spacing: 0.06em;
+  }
+
+  .not-found__prompt {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin: 2rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .not-found__user {
+    color: var(--header);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .not-found__user::after {
+    content: "$ ";
+    color: var(--dot);
+    font-weight: 400;
+  }
+
+  .not-found__link {
+    color: var(--value);
+    text-decoration: none;
+  }
+
+  .not-found__link:hover,
+  .not-found__link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .not-found__caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    background: var(--header);
+    vertical-align: text-bottom;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes not-found-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .not-found,
+    .not-found__caret {
+      animation: none;
+    }
+  }
+</style>

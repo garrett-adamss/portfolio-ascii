@@ -1,0 +1,170 @@
+---
+const STATIC_404 = `_______________________________________________________
+____/\\/____\\/\\________/\\/\\/\\/\\/\\/\\_____/\\/____\\/\\_______
+____\\/\\____/\\/_______/\\/\\/\\/\\/\\/\\/\\____\\/\\____/\\/_______
+____/\\/____\\/\\_______\\/\\_______\\/\\____/\\/____\\/\\_______
+____\\/\\____/\\/_______/\\/_______/\\/____\\/\\____/\\/_______
+____/\\/\\/\\/\\/\\_______\\/\\_______\\/\\____/\\/\\/\\/\\/\\_______
+____\\/\\/\\/\\/\\/_______/\\/_______/\\/____\\/\\/\\/\\/\\/_______
+___________\\/\\_______\\/\\_______\\/\\___________\\/\\_______
+___________/\\/_______/\\/\\/\\/\\/\\/\\/\\___________/\\/_______
+___________\\/\\________/\\/\\/\\/\\/\\/\\____________\\/\\_______
+_______________________________________________________`;
+---
+
+<div class="signal-lost" aria-hidden="true">
+  <pre class="signal-lost__art" data-signal-lost>{STATIC_404}</pre>
+</div>
+
+<script>
+  // 1 = jagged signal stroke, 0 = flat underscore. One char per cell.
+  const H = 11;
+  const W = 55;
+  const PAD_X = 3;
+  const PAD_Y = 1;
+  const GW = 13; // glyph width
+  const GAP = 4;
+
+  /** @type {Record<string, number[][]>} */
+  const GLYPHS = {
+    "4": [
+      [1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+    ],
+    "0": [
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+      [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+      [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+      [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+      [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    ],
+  };
+
+  const TEXT = "404";
+  const GH = GLYPHS["4"].length;
+
+  function buildMask() {
+    /** @type {Uint8Array[]} */
+    const mask = Array.from({ length: H }, () => new Uint8Array(W));
+    const contentW = TEXT.length * GW + (TEXT.length - 1) * GAP;
+    const ox0 = PAD_X + Math.max(0, Math.floor((W - PAD_X * 2 - contentW) / 2));
+    const oy = PAD_Y;
+
+    for (let gi = 0; gi < TEXT.length; gi++) {
+      const glyph = GLYPHS[TEXT[gi]];
+      const ox = ox0 + gi * (GW + GAP);
+      for (let y = 0; y < GH; y++) {
+        for (let x = 0; x < GW; x++) {
+          if (glyph[y][x]) mask[oy + y][ox + x] = 1;
+        }
+      }
+    }
+    return mask;
+  }
+
+  /**
+   * @param {Uint8Array[]} mask
+   * @param {number} tick
+   */
+  function render(mask, tick) {
+    /** @type {string[]} */
+    const lines = [];
+    for (let y = 0; y < H; y++) {
+      let row = "";
+      for (let x = 0; x < W; x++) {
+        if (mask[y][x]) {
+          // Alternating peaks — phase shifts each tick for a live signal feel
+          row += (x + y + tick) & 1 ? "/" : "\\";
+        } else {
+          row += "_";
+        }
+      }
+      lines.push(row);
+    }
+    return lines.join("\n");
+  }
+
+  function init() {
+    const el = document.querySelector("[data-signal-lost]");
+    if (!(el instanceof HTMLElement)) return;
+
+    const mask = buildMask();
+    let tick = 0;
+
+    const paint = () => {
+      el.textContent = render(mask, tick);
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      paint();
+      return;
+    }
+
+    let raf = 0;
+    let last = performance.now();
+    let acc = 0;
+    const FPS = 4;
+
+    const loop = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      acc += dt;
+      if (acc >= 1 / FPS) {
+        acc = 0;
+        tick = (tick + 1) % 2; // flip phase — keeps /\/\ shimmering
+        paint();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+
+    const start = () => {
+      cancelAnimationFrame(raf);
+      last = performance.now();
+      raf = requestAnimationFrame(loop);
+    };
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) cancelAnimationFrame(raf);
+      else start();
+    });
+
+    paint();
+    start();
+  }
+
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>
+
+<style>
+  .signal-lost {
+    width: min(38rem, 94vw);
+    color: #c8cdd3;
+    opacity: 0.92;
+  }
+
+  .signal-lost__art {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: clamp(0.45rem, 1.7vw, 0.78rem);
+    line-height: 1.12;
+    letter-spacing: 0;
+    color: inherit;
+    white-space: pre;
+    overflow: hidden;
+    user-select: none;
+    text-align: center;
+  }
+</style>

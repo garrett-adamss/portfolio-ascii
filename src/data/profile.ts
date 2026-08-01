@@ -23,14 +23,33 @@ export interface ProjectEntry {
   bullets: string[];
 }
 
+function formatTenure(startDate: Date): string {
+  const now = new Date();
+  let years = now.getFullYear() - startDate.getFullYear();
+  let months = now.getMonth() - startDate.getMonth();
+
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  const parts: string[] = [];
+  if (years > 0) parts.push(`${years} ${years === 1 ? "year" : "years"}`);
+  if (months > 0) parts.push(`${months} ${months === 1 ? "month" : "months"}`);
+
+  return parts.join(", ") || "0 months";
+}
+
+const careerStart = new Date(2022, 7, 1); // August 2022
+
 export const profile = {
   username: "richard@adams",
   title: "Richard Adams — Full-Stack Software Engineer",
 
   systemInfo: [
     { label: "Role", value: "Full-Stack Software Engineer" },
-    { label: "Uptime", value: "3 years, 6 months" },
-    { label: "Host", value: "Prometric" },
+    { label: "Uptime", value: formatTenure(careerStart) },
+    { label: "Org", value: "Prometric" },
     { label: "Focus", value: "System design → production ownership" },
     {
       label: "Impact",

@@ -1,0 +1,37 @@
+---
+import InfoRow from "./InfoRow.astro";
+import SectionDivider from "./SectionDivider.astro";
+import { profile } from "../data/profile";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="terminal-footer" aria-label="Site footer">
+  <SectionDivider title="Footer" />
+
+  <div class="terminal-footer__prompt" aria-hidden="true">
+    <span class="terminal-footer__user">{profile.username}</span>
+    <span class="terminal-footer__cmd">exit 0</span>
+  </div>
+
+  <p class="terminal-footer__message">Thanks for visiting. Session closed cleanly.</p>
+
+  {
+    profile.contact.map((field, index) => (
+      <InfoRow
+        label={field.label}
+        value={field.value}
+        href={field.href}
+        delay={60 + index * 40}
+      />
+    ))
+  }
+
+  <div class="terminal-footer__meta">
+    <span class="terminal-footer__copyright">
+      © {year} Richard Adams
+    </span>
+    <span class="terminal-footer__sep" aria-hidden="true">·</span>
+    <span class="terminal-footer__built">Built by myself</span>
+  </div>
+</footer>
