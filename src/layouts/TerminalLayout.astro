@@ -7,7 +7,7 @@ interface Props {
 }
 
 const {
-  title = "Richard Adams — Full-Stack Software Engineer",
+  title = "Garrett Adams",
   description =
     "Full-stack software engineer — system design, cloud-native architecture, and measurable product impact.",
 } = Astro.props;
@@ -34,5 +34,13 @@ const {
     <main class="terminal">
       <slot />
     </main>
+    <script>
+      const activeTitle = document.title;
+      const idleTitle = "come back :)";
+
+      document.addEventListener("visibilitychange", () => {
+        document.title = document.hidden ? idleTitle : activeTitle;
+      });
+    </script>
   </body>
 </html>
