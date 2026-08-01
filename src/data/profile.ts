@@ -44,7 +44,7 @@ const careerStart = new Date(2022, 7, 1); // August 2022
 
 export const profile = {
   username: "richard.garrett@adams",
-  title: "Garrett Adams",
+  title: "Richard G Adams - Software Engineer",
 
   systemInfo: [
     { label: "Role", value: "Full-Stack Software Engineer" },
