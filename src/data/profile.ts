@@ -43,7 +43,7 @@ function formatTenure(startDate: Date): string {
 const careerStart = new Date(2022, 7, 1); // August 2022
 
 export const profile = {
-  username: "richard@adams",
+  username: "richard.garrett@adams",
   title: "Garrett Adams",
 
   systemInfo: [
