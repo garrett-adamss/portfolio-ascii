@@ -33,13 +33,5 @@ const {
     <main class="terminal">
       <slot />
     </main>
-    <script>
-      const activeTitle = document.title;
-      const idleTitle = "come back :)";
-
-      document.addEventListener("visibilitychange", () => {
-        document.title = document.hidden ? idleTitle : activeTitle;
-      });
-    </script>
   </body>
 </html>
